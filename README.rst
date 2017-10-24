@@ -1,4 +1,4 @@
-skele-cli
+tengu-cli
 =========
 
 *Tengu command line program in Python.*
