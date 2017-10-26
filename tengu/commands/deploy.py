@@ -59,5 +59,5 @@ class Deploy(Base):
                         'rolling': 'true',
                         'containername': self.options['--workspace'],
                         'image': 'localhost:5000/tengu/'+ self.options['--workspace'],
-                        'env_vars': ['deployedAt=' + datetime.now().isoformat()],
+                        'env_vars': {'deployedAt': datetime.now().isoformat()},
                         })
