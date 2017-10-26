@@ -33,15 +33,15 @@ class RunTests(Command):
 
 
 setup(
-    name = 'tengu',
-    version = __version__,
-    description = 'Tengu command line program in Python.',
-    long_description = long_description,
-    url = 'https://github.com/tengu-team/tengu-cli',
-    author = 'Sander Borny',
-    author_email = 'sander.borny@ugent.be',
-    license = 'UNLICENSE',
-    classifiers = [
+    name='tengu',
+    version=__version__,
+    description='Tengu command line program in Python.',
+    long_description=long_description,
+    url='https://github.com/tengu-team/tengu-cli',
+    author='Sander Borny',
+    author_email='sander.borny@ugent.be',
+    license='UNLICENSE',
+    classifiers=[
         'Intended Audience :: Developers',
         'Topic :: Utilities',
         'License :: Public Domain',
@@ -56,16 +56,16 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    keywords = 'cli',
-    packages = find_packages(exclude=['docs', 'tests*']),
-    install_requires = ['docopt'],
-    extras_require = {
+    keywords='cli',
+    packages=find_packages(exclude=['docs', 'tests*']),
+    install_requires=['docopt', 'jinja2'],
+    extras_require={
         'test': ['coverage', 'pytest', 'pytest-cov'],
     },
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'tengu=tengu.cli:main',
         ],
     },
-    cmdclass = {'test': RunTests},
+    cmdclass={'test': RunTests},
 )
