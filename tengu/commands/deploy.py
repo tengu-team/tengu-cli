@@ -8,6 +8,7 @@ from .base import Base
 class Deploy(Base):
 
     def run(self):
+        from sys import exit
         from subprocess import check_output, check_call, CalledProcessError, Popen
         self.ensure_deployable()
         pod = self.get_k8s_pod()
@@ -19,6 +20,7 @@ class Deploy(Base):
             check_call(['docker', 'push', 'localhost:5000/tengu/' + self.options['--workspace']])
         except CalledProcessError as e:
             print(e)
+            exit(1)
         kube_proxy.terminate()
         self.create_k8s_configuration()
         self.deploy_to_k8s()
@@ -66,7 +68,7 @@ class Deploy(Base):
         from sys import exit
         from subprocess import check_call, CalledProcessError
         try:
-            check_call(['kubectl', 'deploy', '-f', self.options['--path'] + '/tengu/kubernetes.yaml'])
+            check_call(['kubectl', 'create', '-f', self.options['--path'] + '/tengu/kubernetes.yaml'])
         except CalledProcessError as e:
             print(e)
             exit(1)
