@@ -11,17 +11,14 @@ class Deploy(Base):
         from sys import exit
         from subprocess import check_output, check_call, CalledProcessError, Popen
         self.ensure_deployable()
-        pod = self.get_k8s_pod()
-        kube_proxy = Popen(['kubectl', 'port-forward', '-n', 'kube-system', pod, '5000:5000'])
         try:
             check_call(['docker', 'build', '-t', self.options['--workspace'], self.options['--path']])
             check_call(['docker', 'tag', self.options['--workspace'],
-                        'localhost:5000/tengu/'+ self.options['--workspace']])
-            check_call(['docker', 'push', 'localhost:5000/tengu/' + self.options['--workspace']])
+                        self.options['--docker-repository'] + '/tengu/' + self.options['--workspace']])
+            check_call(['docker', 'push', self.options['--docker-repository'] + '/tengu/' + self.options['--workspace']])
         except CalledProcessError as e:
             print(e)
             exit(1)
-        kube_proxy.terminate()
         self.create_k8s_configuration()
         self.deploy_to_k8s()
 
@@ -34,19 +31,15 @@ class Deploy(Base):
         if not os.path.exists(self.options['--path'] + '/tengu'):
             os.makedirs(self.options['--path'] + '/tengu')
 
-    def get_k8s_pod(self):
-        from subprocess import check_output, CalledProcessError
+    def get_host_ip(self):
         from sys import exit
-
-        cmd = ['kubectl', 'get', 'pods', '-n', 'kube-system', '-l', 'k8s-app=kube-registry-upstream',
-               '-o', 'template', '--template',
-               "'{{range .items}}{{.metadata.name}} {{.status.phase}}{{\"\\n\"}}{{end}}'"]
+        from subprocess import check_output, CalledProcessError
         try:
-            pods = check_output(cmd).decode('utf-8')
+            # Get default route ip
+            return check_output(['ip', 'route', 'show']).decode('utf-8').rstrip().split()[2]
         except CalledProcessError as e:
             print(e)
             exit(1)
-        return pods.split()[0].lstrip("'")
 
     def create_k8s_configuration(self):
         from datetime import datetime
@@ -54,21 +47,31 @@ class Deploy(Base):
         render(source=self.package_dir + '/templates/deployment.tmpl',
                target=self.options['--path'] + '/tengu/kubernetes.yaml',
                context={'deploymentname': self.options['--workspace'],
-                        'namespace': 'dev',  # HARDCODED NAMESPACE !
+                        'namespace': 'default',  # HARDCODED NAMESPACE !
                         'replicas': '1',
                         'selector': 'tengu',
                         'selectorname': self.options['--workspace'],
                         'rolling': 'true',
                         'containername': self.options['--workspace'],
-                        'image': 'localhost:5000/tengu/'+ self.options['--workspace'],
+                        'image': self.options['--docker-repository'] + '/tengu/' + self.options['--workspace'],
                         'env_vars': {'deployedAt': datetime.now().isoformat()},
                         })
 
     def deploy_to_k8s(self):
         from sys import exit
-        from subprocess import check_call, CalledProcessError
+        import os
+        import json
+        import yaml
+        import requests
+        url = 'http://' + self.get_host_ip() + ':5000/deploy/' + self.options['--workspace']
+        headers = {'Content-Type': 'application/json'}
         try:
-            check_call(['kubectl', 'create', '-f', self.options['--path'] + '/tengu/kubernetes.yaml'])
-        except CalledProcessError as e:
+            with open(self.options['--path'] + '/tengu/kubernetes.yaml') as f:
+                deployment = yaml.load(f)
+                r = requests.put(url, data=json.dumps(deployment), headers=headers)
+        except OSError as e:
+            print(e)
+            exit(1)
+        except requests.exceptions.RequestException as e:
             print(e)
             exit(1)
