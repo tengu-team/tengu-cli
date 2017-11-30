@@ -12,10 +12,8 @@ class Deploy(Base):
         from subprocess import check_output, check_call, CalledProcessError, Popen
         self.ensure_deployable()
         try:
-            check_call(['docker', 'build', '-t', self.options['--workspace'], self.options['--path']])
-            check_call(['docker', 'tag', self.options['--workspace'],
-                        self.options['--docker-repository'] + '/tengu/' + self.options['--workspace']])
-            check_call(['docker', 'push', self.options['--docker-repository'] + '/tengu/' + self.options['--workspace']])
+            check_call(['docker', 'build', '-t', self.options['--docker-repository'], self.options['--path']])
+            check_call(['docker', 'push', self.options['--docker-repository']])
         except CalledProcessError as e:
             print(e)
             exit(1)
@@ -53,7 +51,7 @@ class Deploy(Base):
                         'selectorname': self.options['--workspace'],
                         'rolling': 'true',
                         'containername': self.options['--workspace'],
-                        'image': self.options['--docker-repository'] + '/tengu/' + self.options['--workspace'],
+                        'image': self.options['--docker-repository'],
                         'env_vars': {'deployedAt': datetime.now().isoformat()},
                         })
 
@@ -69,6 +67,8 @@ class Deploy(Base):
             with open(self.options['--path'] + '/tengu/kubernetes.yaml') as f:
                 deployment = yaml.load(f)
                 r = requests.put(url, data=json.dumps(deployment), headers=headers)
+                if r.status_code == 200:
+                    print("Deployment done")
         except OSError as e:
             print(e)
             exit(1)
