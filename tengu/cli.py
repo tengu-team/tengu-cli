@@ -3,6 +3,7 @@ tengu
 Usage:
   tengu hello
   tengu deploy (--path=<path>) (--workspace=<workspace>) (--namespace=<namespace>) (--docker-repository=<dockerrepo>)
+  tengu resources
   tengu -h | --help
   tengu --version
 Options:
