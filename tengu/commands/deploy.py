@@ -29,16 +29,6 @@ class Deploy(Base):
         if not os.path.exists(self.options['--path'] + '/tengu'):
             os.makedirs(self.options['--path'] + '/tengu')
 
-    def get_host_ip(self):
-        from sys import exit
-        from subprocess import check_output, CalledProcessError
-        try:
-            # Get default route ip
-            return check_output(['ip', 'route', 'show']).decode('utf-8').rstrip().split()[2]
-        except CalledProcessError as e:
-            print(e)
-            exit(1)
-
     def create_k8s_configuration(self):
         from datetime import datetime
         from tengu.utils import render
