@@ -10,7 +10,8 @@ class Resources(Base):
     def run(self):
         import requests
         from sys import exit
-        url = 'http://' + self.get_host_ip() + ':5000/juju/applications'  # VERANDER NAAR /applications !!!!
+        from tengu.utils import get_host_ip
+        url = 'http://' + get_host_ip() + ':5000/juju/applications'
         try:
             r = requests.get(url)
             print(dumps(r.json(), indent=2, sort_keys=True))

@@ -35,7 +35,7 @@ class Deploy(Base):
         render(source=self.package_dir + '/templates/deployment.tmpl',
                target=self.options['--path'] + '/tengu/kubernetes.yaml',
                context={'deploymentname': self.options['--workspace'],
-                        'namespace': 'default',  # HARDCODED NAMESPACE !
+                        'namespace': self.options['--namespace'],
                         'replicas': '1',
                         'selector': 'tengu',
                         'selectorname': self.options['--workspace'],
@@ -47,11 +47,12 @@ class Deploy(Base):
 
     def deploy_to_k8s(self):
         from sys import exit
+        from tengu.utils import get_host_ip
         import os
         import json
         import yaml
         import requests
-        url = 'http://' + self.get_host_ip() + ':5000/deploy/' + self.options['--workspace']
+        url = 'http://' + get_host_ip() + ':5000/deploy/' + self.options['--workspace']
         headers = {'Content-Type': 'application/json'}
         try:
             with open(self.options['--path'] + '/tengu/kubernetes.yaml') as f:

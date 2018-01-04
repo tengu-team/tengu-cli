@@ -12,14 +12,3 @@ class Base(object):
 
     def run(self):
         raise NotImplementedError('You must implement the run() method yourself!')
-
-    @staticmethod
-    def get_host_ip():
-        from sys import exit
-        from subprocess import check_output, CalledProcessError
-        try:
-            # Get default route ip
-            return check_output(['ip', 'route', 'show']).decode('utf-8').rstrip().split()[2]
-        except CalledProcessError as e:
-            print(e)
-            exit(1)

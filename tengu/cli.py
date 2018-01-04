@@ -2,13 +2,14 @@
 tengu
 Usage:
   tengu hello
-  tengu deploy (--path=<path>) (--workspace=<workspace>) (--namespace=<namespace>) (--docker-repository=<dockerrepo>)
+  tengu deploy (--path=<path>) (--workspace=<workspace>) (--docker-repository=<dockerrepo>) [--namespace=<kn>]
   tengu resources
   tengu -h | --help
   tengu --version
 Options:
   -h --help                         Show this screen.
   --version                         Show version.
+  --namespace=<kn>                  Namespace [default: default].
 Examples:
   tengu hello
 Help:
