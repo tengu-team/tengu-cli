@@ -59,7 +59,9 @@ class Deploy(Base):
                 deployment = yaml.load(f)
                 r = requests.put(url, data=json.dumps(deployment), headers=headers)
                 if r.status_code == 200:
-                    print("Deployment done")
+                    print("Deployment DONE")
+                else:
+                    print("Deployment FAILED")
         except OSError as e:
             print(e)
             exit(1)
